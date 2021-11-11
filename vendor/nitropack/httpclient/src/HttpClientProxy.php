@@ -1,31 +1,15 @@
 <?php
-
 namespace NitroPack;
 
 class HttpClientProxy {
-    private $scheme;
-    private $host;
-    private $addr;
-    private $port;
+    protected $addr;
+    protected $port;
+    protected $forceOnPrivate;
 
-    public function __construct($url) {
-        $url = new Url($url);
-        $this->scheme = strtolower($url->getScheme());
-        $this->host = $url->getHost();
-        $this->addr = gethostbyname($this->host);
-        $this->port = $url->getPort();
-
-        if (!$this->port) {
-            $this->port = $this->scheme == 'https' ? 443 : 80;
-        }
-    }
-
-    public function getScheme() {
-        return $this->scheme;
-    }
-
-    public function getHost() {
-        return $this->host;
+    public function __construct($ip, $port, $forceOnPrivate = false) {
+        $this->addr = $ip;
+        $this->port = $port ? $port : 1080;
+        $this->forceOnPrivate = $forceOnPrivate;
     }
 
     public function getAddr() {
@@ -34,5 +18,9 @@ class HttpClientProxy {
 
     public function getPort() {
         return $this->port;
+    }
+
+    public function shouldForceOnPrivate() {
+        return $this->forceOnPrivate;
     }
 }

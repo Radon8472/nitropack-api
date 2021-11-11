@@ -2,7 +2,7 @@
 namespace NitroPack\SDK;
 
 class NitroPack {
-    const VERSION = '0.30.0';
+    const VERSION = '0.30.1';
     const PAGECACHE_LOCK_EXPIRATION_TIME = 300; // in seconds
     private $dataDir;
     private $cachePath = array('data', 'pagecache');

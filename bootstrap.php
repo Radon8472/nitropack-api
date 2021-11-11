@@ -10,6 +10,7 @@ define("NITROPACK_SITE_SECRET", "your site secret");
  */
 if (!defined("NITROPACK_ENABLE_COMPRESSION")) define("NITROPACK_ENABLE_COMPRESSION", false); // Set this to true to enable compression. Only do this if your server does not already have compression enabled
 if (!defined("NITROPACK_WEBHOOK_TOKEN")) define("NITROPACK_WEBHOOK_TOKEN", md5(__FILE__)); // Feel free to set this to a value of your liking
+if (!defined("NITROPACK_USE_QUICK_PURGE")) define("NITROPACK_USE_QUICK_PURGE", false); // Feel free to set this to a value of your liking
 if (!defined("NITROPACK_USE_REDIS")) define("NITROPACK_USE_REDIS", false); // Set this to true to enable storing cache in Redis
 if (!defined("NITROPACK_REDIS_HOST")) define("NITROPACK_REDIS_HOST", "127.0.0.1"); // Set this to the IP of your Redis server
 if (!defined("NITROPACK_REDIS_PORT")) define("NITROPACK_REDIS_PORT", 6379); // Set this to the port of your Redis server
@@ -259,7 +260,7 @@ function nitropack_sdk_purge_local($url = NULL) {
             if ($url) {
                 $nitro->purgeLocalUrlCache($url);
             } else {
-                $nitro->purgeLocalCache();
+                $nitro->purgeLocalCache(NITROPACK_USE_QUICK_PURGE);
             }
         } catch (\Exception $e) {
             return false;

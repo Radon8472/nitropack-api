@@ -7,12 +7,12 @@
             "source": {
                 "type": "git",
                 "url": "git@bitbucket.org:nitropack/httpclient.git",
-                "reference": "ed666783d9d5911f86e563ba3b4b7969020efc5a"
+                "reference": "ae92c176c1800a7ebf817f39d76324664290c958"
             },
             "require": {
                 "nitropack/url": "dev-master"
             },
-            "time": "2021-06-11T09:58:05+00:00",
+            "time": "2021-11-05T10:15:43+00:00",
             "default-branch": true,
             "type": "library",
             "installation-source": "source",

@@ -204,6 +204,8 @@ class HttpClient {
     private $portsOverride;
 
     private $proxy;
+    private $privateIpRanges;
+    private $isReusingConnection;
 
     public function __construct($URL, $httpConfig = NULL) {
         $this->prevUrl = NULL;
@@ -249,6 +251,25 @@ class HttpClient {
         $this->state = HttpClientState::READY;
         $this->hostsOverride = array();
         $this->portsOverride = array();
+
+        if (function_exists("getenv")) {
+            $proxyVars = ["NITROPACK_HTTP_PROXY", "ALL_PROXY", "HTTP_PROXY", "http_proxy"];
+            foreach ($proxyVars as $varName) {
+                $proxyEnv = getenv($varName);
+                if (!empty($proxyEnv)) {
+                    $proxyUrl = new Url($proxyEnv);
+                    switch ($proxyUrl->getScheme()) {
+                    case "socks":
+                    case "socks4":
+                    case "socks4a":
+                        if ($proxyUrl->getHost()) {
+                            $this->setProxy(new HttpClientSocks4Proxy($proxyUrl->getHost(), $proxyUrl->getPort()));
+                        }
+                    }
+                    break;
+                }
+            }
+        }
     }
 
     public function __destruct() {
@@ -499,6 +520,27 @@ class HttpClient {
         $this->proxy = $proxy;
     }
 
+    private function shouldUseProxy() {
+        return $this->proxy && (!$this->isPrivateIp($this->addr) || $this->proxy->shouldForceOnPrivate());
+    }
+
+    private function isPrivateIp($ip) {
+        if (!$this->privateIpRanges) {
+            $this->privateIpRanges = array(
+                array(ip2long("10.0.0.0"), ip2long("10.255.255.255")),
+                array(ip2long("172.16.0.0"), ip2long("172.31.255.255")),
+                array(ip2long("192.168.0.0"), ip2long("192.168.255.255"))
+            );
+        }
+
+        $ipLong = ip2long($ip);
+        foreach ($this->privateIpRanges as $range) {
+            if ($ipLong >= $range[0] && $ipLong <= $range[1]) return true;
+        }
+
+        return false;
+    }
+
     public function hostOverride($host, $dest) {
         $parts = explode(":", $dest);
 
@@ -585,6 +627,9 @@ class HttpClient {
         if ($this->isAsync) {
             $this->asyncQueue = array();
             $this->asyncQueue[] = array($this, 'connect');
+            if ($this->shouldUseProxy() && $this->proxy instanceof HttpClientSocksProxy) {
+                $this->asyncQueue[] = array($this, 'socksProxyConnect');
+            }
             $this->asyncQueue[] = array($this, 'enableSSL');
             $this->asyncQueue[] = array($this, 'sendRequest');
             $this->asyncQueue[] = array($this, 'download');
@@ -594,6 +639,9 @@ class HttpClient {
                 call_user_func(HttpClient::$fetch_start_callback, $this->URL, false);
             }
             $this->connect();
+            if ($this->shouldUseProxy() && $this->proxy instanceof HttpClientSocksProxy) {
+                $this->socksProxyConnect();
+            }
             $this->enableSSL();
             $this->sendRequest();
             $this->download();
@@ -709,8 +757,15 @@ class HttpClient {
     public function connect() {
         $this->state = HttpClientState::CONNECT;
         BEGIN_CONNECT:
-        $addr = $this->proxy ? $this->proxy->getAddr() : $this->addr;
-        $port = $this->proxy ? $this->proxy->getPort() : $this->port;
+        $this->isReusingConnection = false;
+        if ($this->shouldUseProxy()) {
+            $addr = $this->proxy->getAddr();
+            $port = $this->proxy->getPort();
+        } else {
+            $addr = $this->addr;
+            $port = $this->port;
+        }
+
         $host = $this->host;
         $reuseKey = implode(':', array($host, $port));
         if (isset(self::$connections[$reuseKey])) {
@@ -720,6 +775,7 @@ class HttpClient {
                 $this->sock = $sock;
                 if ($this->isConnectionValid()) {// check if the connection is still alive
                     $this->acquireConnection();
+                    $this->isReusingConnection = true;
                     return true;
                 } else {
                     $this->disconnect(); // Remove the inactive connection
@@ -773,7 +829,7 @@ class HttpClient {
 
         if($this->sock === false) {
             $this->addr = $this->gethostbyname($this->host, true);
-            if ($this->addr && !$this->proxy) {
+            if ($this->addr && !$this->shouldUseProxy()) {
                 if ($this->isAsync) {
                     return false;
                 } else {
@@ -795,7 +851,27 @@ class HttpClient {
 
         HttpClient::$secure_connections[(int)$this->sock] = false;
         $this->acquireConnection();
+
         return true;
+    }
+
+    public function socksProxyConnect() {
+        if ($this->shouldUseProxy() && !$this->isReusingConnection) {
+            try {
+                if ($this->isAsync) {
+                    return $this->proxy->connectAsync($this->sock, $this->addr, $this->port, $this->host);
+                } else {
+                    stream_set_blocking($this->sock, true);
+                    $this->proxy->connect($this->sock, $this->addr, $this->port, $this->host);
+                    stream_set_blocking($this->sock, false);
+                }
+            } catch (ProxyConnectException $e) {
+                $this->disconnect();
+                throw $e;
+            }
+        } else {
+            return true;
+        }
     }
 
     public function enableSSL() {
@@ -815,7 +891,7 @@ class HttpClient {
         }
 
         //set_error_handler(array($this, 'error_sink'));
-        $scheme = $this->proxy ? $this->proxy->getScheme() : $this->scheme;
+        $scheme = $this->scheme;
         if ($scheme == 'https') {
             if (!$this->ssl_negotiation_start) {
                 $this->ssl_negotiation_start = microtime(true);
@@ -1260,10 +1336,6 @@ class HttpClient {
             $headers[] = "connection: keep-alive";
         }
 
-        if ($this->proxy) {
-            $headers[] = "x-proxy-request-scheme: " . $this->scheme;
-        }
-
         $cookies_combined = array();
         if (is_array($this->cookies)) {
             foreach ($this->cookies as $domain=>$cookies) {
@@ -1296,7 +1368,7 @@ class HttpClient {
             $headers[] =  "accept: */*";
         }
 
-        if ($this->post_data && $this->http_method == "POST") {
+        if ($this->post_data && ($this->http_method == "POST" || $this->http_method == "PUT") ) {
             if ($this->post_data_type) {
                 $headers[] = "content-type: " . $this->post_data_type;
             }

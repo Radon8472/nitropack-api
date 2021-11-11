@@ -18,7 +18,7 @@ class RemoteConfigFetcher extends Base {
         // initiate the config request, expecting to receive a challenge
         $initiation = $this->initiateConfigRequest();
         if ($initiation->getStatus() != ResponseStatus::OK) {
-            throw new \Exception('Error while attempting to fetch remote config'); // TODO better error message and/or custom exception class and logging
+            throw new \NitroPack\SDK\ConfigFetcherException('Error while initializing remote config fetch request. Response code: ' . $initiation->getStatus()); // TODO better error message and logging
         }
 
         try {
@@ -27,20 +27,20 @@ class RemoteConfigFetcher extends Base {
              * where cid is the challenge id, sc0/1 are the two challenge strings, and resp is the challenge response for sc0 to verify the server knows the secret */
             $challenge = json_decode($initiation->getBody(), true);
         } catch (\Exception $e) {
-            throw new \Exception('Error while processing remote config challenge'); // TODO better error message and/or custom exception class and logging
+            throw new \NitroPack\SDK\ChallengeProcessingException('Error while processing remote config challenge'); // TODO better error message and logging
         }
 
         // verify that the challenge came from the API server
         $expectedResponse = $this->calculateChallengeResponse($challenge['sc0']);
 
         if (!$this->internal_hash_equals($expectedResponse, $challenge['resp'])) {
-            throw new \Exception('API server failed challenge verification when fetching the remote config'); // TODO better error message and/or custom exception class and logging
+            throw new \NitroPack\SDK\ChallengeVerificationException('API server failed challenge verification when fetching the remote config'); // TODO better error message and logging
         }
 
         $challengeResponse = $this->respondToChallenge($challenge['sc1'], $challenge['cid']);
 
         if ($challengeResponse->getStatus() != ResponseStatus::OK) {
-            throw new \Exception('Error while receiving remote config - Received ' . $challengeResponse->getStatus()); // TODO better error message and/or custom exception class and logging
+            throw new \NitroPack\SDK\ConfigFetcherException('Error while receiving remote config. Response code: ' . $challengeResponse->getStatus()); // TODO better error message and logging
         }
 
         return $challengeResponse->getBody();
