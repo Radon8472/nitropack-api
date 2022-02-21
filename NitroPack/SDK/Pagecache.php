@@ -12,13 +12,21 @@ class Pagecache {
     protected $Device;
     protected $useCompression;
     protected $useInvalidated;
+    private $urlPathVersion;
 
-    public static function getUrlDir($dataDir, $url, $useInvalidated = false) {
+    public static function getUrlDir($dataDir, $url, $useInvalidated = false, $pathVersion = 1) {
         $safeUrl = str_replace(array('/','?',':',';','=','&','.','--','%','~'),'-', $url);
         if (defined('NITRO_DEBUG_MODE') && NITRO_DEBUG_MODE) {
             $urlDir = $dataDir . "/" . $safeUrl;
         } else {
-            $urlDir = $dataDir . "/" . md5($safeUrl);
+            switch ($pathVersion) {
+            case 2:
+                $urlDir = $dataDir . "/" . md5($url);
+                break;
+            default:
+                $urlDir = $dataDir . "/" . md5($safeUrl);
+                break;
+            }
         }
 
         if ($useInvalidated) {
@@ -37,6 +45,7 @@ class Pagecache {
         $this->Device = new Device($userAgent);
         $this->useCompression = false;
         $this->useInvalidated = false;
+        $this->setUrlPathVersion(1);
         $this->setReferer($referer);
     }
 
@@ -69,8 +78,16 @@ class Pagecache {
         $this->referer = $referer ? new \NitroPack\Url($referer) : NULL;
         if ($this->referer) {
             $this->parent = new Pagecache($this->referer->getUrl(), $this->Device->getUserAgent(), $this->cookies, $this->supportedCookies);
+            $this->parent->setUrlPathVersion($this->urlPathVersion);
         } else {
             $this->parent = NULL;
+        }
+    }
+
+    public function setUrlPathVersion($version = 1) {
+        $this->urlPathVersion = $version;
+        if ($this->parent) {
+            $this->parent->setUrlPathVersion($version);
         }
     }
 
@@ -312,8 +329,8 @@ class Pagecache {
     public function getCachefilePath($suffix = "") {
         if ($suffix) $suffix = "." . $suffix;
         if ($this->isAjax && $this->referer) {
-            return self::getUrlDir($this->dataDir, $this->referer->getUrl(), $this->useInvalidated) . "/" . $this->nameOfCachefile() . $suffix;
+            return self::getUrlDir($this->dataDir, $this->referer->getUrl(), $this->useInvalidated, $this->urlPathVersion) . "/" . $this->nameOfCachefile() . $suffix;
         }
-        return self::getUrlDir($this->dataDir, $this->url->getUrl(), $this->useInvalidated) . "/" . $this->nameOfCachefile() . $suffix;
+        return self::getUrlDir($this->dataDir, $this->url->getUrl(), $this->useInvalidated, $this->urlPathVersion) . "/" . $this->nameOfCachefile() . $suffix;
     }
 }

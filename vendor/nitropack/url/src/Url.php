@@ -18,9 +18,9 @@ class Url {
     public function __construct($url) {
         $this->url = $url;
         $parts = parse_url($url);
-        $this->scheme = isset($parts["scheme"]) ? $parts["scheme"] : NULL;
+        $this->scheme = isset($parts["scheme"]) ? strtolower($parts["scheme"]) : NULL;
         $this->port = isset($parts["port"]) ? $parts["port"] : NULL;
-        $this->host = isset($parts["host"]) ? $parts["host"] : NULL;
+        $this->host = isset($parts["host"]) ? strtolower($parts["host"]) : NULL;
         $this->path = isset($parts["path"]) ? $parts["path"] : "/";
         $this->query = isset($parts["query"]) ? $parts["query"] : NULL;
         $this->hash = isset($parts["fragment"]) ? $parts["fragment"] : NULL;

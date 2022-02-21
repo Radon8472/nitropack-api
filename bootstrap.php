@@ -16,6 +16,7 @@ if (!defined("NITROPACK_REDIS_HOST")) define("NITROPACK_REDIS_HOST", "127.0.0.1"
 if (!defined("NITROPACK_REDIS_PORT")) define("NITROPACK_REDIS_PORT", 6379); // Set this to the port of your Redis server
 if (!defined("NITROPACK_REDIS_PASS")) define("NITROPACK_REDIS_PASS", NULL); // Set this to the password of your redis server if authentication is needed
 if (!defined("NITROPACK_REDIS_DB")) define("NITROPACK_REDIS_DB", NULL); // Set this to the number of the Redis DB if you'd like to not use the default one
+if (!defined("NITROPACK_DATA_DIR")) define("NITROPACK_DATA_DIR", NULL); // Set this to the number of the Redis DB if you'd like to not use the default one
 
 if (NITROPACK_USE_REDIS) {
     NitroPack\SDK\Filesystem::setStorageDriver(new NitroPack\SDK\StorageDriver\Redis(
@@ -44,7 +45,11 @@ function nitropack_get_instance($siteId = NULL, $siteSecret = NULL, $url = NULL)
             NitroPack\SDK\NitroPack::addCookieFilter("nitropack_filter_non_original_cookies");
             $siteId = $siteId !== NULL ? $siteId : NITROPACK_SITE_ID;
             $siteSecret = $siteSecret !== NULL ? $siteSecret : NITROPACK_SITE_SECRET;
-            $instances[$key] = new NitroPack\SDK\NitroPack($siteId, $siteSecret, NULL, $url);
+            if (NITROPACK_DATA_DIR) {
+                $instances[$key] = new NitroPack\SDK\NitroPack($siteId, $siteSecret, NULL, $url, NITROPACK_DATA_DIR);
+            } else {
+                $instances[$key] = new NitroPack\SDK\NitroPack($siteId, $siteSecret, NULL, $url);
+            }
         } catch(\Exception $e) {
             $instances[$key] = NULL;
         }

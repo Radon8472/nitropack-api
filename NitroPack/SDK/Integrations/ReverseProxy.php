@@ -7,10 +7,12 @@ class ReverseProxy {
 
     protected $serverList;
     protected $purgeMethod;
+    protected $headers;
 
-    public function __construct($serverList=null, $purgeMethod="PURGE") {
+    public function __construct($serverList=null, $purgeMethod="PURGE", $headers = []) {
         $this->serverList = $serverList;
         $this->purgeMethod = $purgeMethod;
+        $this->headers = $headers;
     }
 
     public function setServerList($serverList=null) {
@@ -21,6 +23,10 @@ class ReverseProxy {
         $this->purgeMethod = $method;
     }
 
+    public function setHeader($name, $value) {
+        $this->headers[$name] = $value;
+    }
+
     public function purge($url) {
         if (empty($this->serverList)) return false;
 
@@ -29,6 +35,11 @@ class ReverseProxy {
             $client = new HttpClient($url);
             $client->hostOverride($client->host, $server);
             $client->doNotDownload = true;
+
+            foreach ($this->headers as $name => $value) {
+                $client->setHeader($name, $value);
+            }
+
             $httpMulti->push($client);
         }
 

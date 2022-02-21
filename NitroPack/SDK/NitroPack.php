@@ -2,7 +2,7 @@
 namespace NitroPack\SDK;
 
 class NitroPack {
-    const VERSION = '0.30.1';
+    const VERSION = '0.30.3';
     const PAGECACHE_LOCK_EXPIRATION_TIME = 300; // in seconds
     private $dataDir;
     private $cachePath = array('data', 'pagecache');
@@ -149,6 +149,10 @@ class NitroPack {
             $refererInfo = new \NitroPack\Url($_SERVER["HTTP_REFERER"]);
             $this->pageCache->setReferer($refererInfo->getNormalized());
         }
+        if (!empty($this->config->URLPathVersion)) {
+            $this->pageCache->setUrlPathVersion($this->config->URLPathVersion);
+        }
+
 
         $this->api = new Api($this->siteId, $siteSecret);
         $this->api->setBacklog($this->backlog);
@@ -427,6 +431,13 @@ class NitroPack {
 
     public function purgeLocalCache($quick = false) {
         $staleCacheDir = $this->getCacheDir() . '.stale.' . md5(microtime(true));
+        $staleCacheDirSuffix = "";
+        $counter = 0;
+        while (Filesystem::fileExists($staleCacheDir . $staleCacheDirSuffix)) {
+            $counter++;
+            $staleCacheDirSuffix = "_" . $counter;
+        }
+        $staleCacheDir .= $staleCacheDirSuffix;
         $this->purgeProxyCache();
         $this->config->LastFetch = 0;
         $this->setConfig($this->config);
@@ -654,8 +665,8 @@ class NitroPack {
         $cacheDir = $this->getCacheDir();
         $knownDeviceTypes = Device::getKnownTypes();
         foreach ($knownDeviceTypes as $deviceType) {
-            $urlDir = PageCache::getUrlDir($cacheDir . "/" . $deviceType, $url);
-            $invalidatedUrlDir = PageCache::getUrlDir($cacheDir . "/" . $deviceType, $url, true);
+            $urlDir = PageCache::getUrlDir($cacheDir . "/" . $deviceType, $url, false, $this->config->URLPathVersion);
+            $invalidatedUrlDir = PageCache::getUrlDir($cacheDir . "/" . $deviceType, $url, true, $this->config->URLPathVersion);
             $localResult &= Filesystem::deleteDir($urlDir);
             $localResult &= Filesystem::deleteDir($invalidatedUrlDir);
         }
@@ -669,8 +680,8 @@ class NitroPack {
         $cacheDir = $this->getCacheDir();
         $knownDeviceTypes = Device::getKnownTypes();
         foreach ($knownDeviceTypes as $deviceType) {
-            $urlDir = PageCache::getUrlDir($cacheDir . "/" . $deviceType, $url);
-            $urlDirInvalid = PageCache::getUrlDir($cacheDir . "/" . $deviceType, $url, true);
+            $urlDir = PageCache::getUrlDir($cacheDir . "/" . $deviceType, $url, false, $this->config->URLPathVersion);
+            $urlDirInvalid = PageCache::getUrlDir($cacheDir . "/" . $deviceType, $url, true, $this->config->URLPathVersion);
 
             $this->invalidateDir($urlDir, $urlDirInvalid);
         }

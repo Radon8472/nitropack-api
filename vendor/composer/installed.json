@@ -42,9 +42,12 @@
             "source": {
                 "type": "git",
                 "url": "git@bitbucket.org:nitropack/url.git",
-                "reference": "55b4d631e69a697a9de0fd8e1cbbfa063226a5b8"
+                "reference": "e1a54ed35d8990059b1d67857c0c096d21fc2c36"
             },
-            "time": "2021-06-10T15:14:52+00:00",
+            "require-dev": {
+                "phpunit/phpunit": "^9"
+            },
+            "time": "2022-02-11T08:44:53+00:00",
             "default-branch": true,
             "type": "library",
             "installation-source": "source",
@@ -68,6 +71,6 @@
             "install-path": "../nitropack/url"
         }
     ],
-    "dev": true,
+    "dev": false,
     "dev-package-names": []
 }

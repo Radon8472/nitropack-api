@@ -5,9 +5,9 @@
         'type' => 'package',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
-        'reference' => '13fbb0581464ff6224e9905cc422ba0f91e5a232',
+        'reference' => '418ad1e9f75391257fdd0fa2736c887bcf125466',
         'name' => 'nitropack/nitropackcloud-sdk',
-        'dev' => true,
+        'dev' => false,
     ),
     'versions' => array(
         'nitropack/httpclient' => array(
@@ -27,7 +27,7 @@
             'type' => 'package',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
-            'reference' => '13fbb0581464ff6224e9905cc422ba0f91e5a232',
+            'reference' => '418ad1e9f75391257fdd0fa2736c887bcf125466',
             'dev_requirement' => false,
         ),
         'nitropack/url' => array(
@@ -38,7 +38,7 @@
             'aliases' => array(
                 0 => '9999999-dev',
             ),
-            'reference' => '55b4d631e69a697a9de0fd8e1cbbfa063226a5b8',
+            'reference' => 'e1a54ed35d8990059b1d67857c0c096d21fc2c36',
             'dev_requirement' => false,
         ),
     ),
