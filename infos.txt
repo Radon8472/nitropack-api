@@ -1,0 +1,21 @@
+- Offizelle NitroPack SDK ist scheinbar nicht öffentlich zugänlich, liegt unter:
+	- git@bitbucket.org:nitropack/httpclient.git
+	- git@bitbucket.org:nitropack/url.git
+
+	- Aktuelle Version im Seiten-Download ist NICHT immer die aktuellste, z.b. Wordpress-Plugin hat eine neuer Version integriert
+
+- Es gibt auch eine inoffzielle (öffentlich verfügbare) SDK
+
+
+
+https://github.com/MacroMan/nitropack-api
+	- https://github.com/MacroMan/nitropack-api
+		- Laut Beschreibung basiert es weitesgehend auf der Offizellen Api, vorwiegend mit Änderungen im Composer-Support zu Unterstützen
+
+
+-- Client-Secret ect. bekommt man im Nitro-Account unter:
+	https://nitropack.io/user/connect
+(Muss also nicht zwangsläufig per OAuth erstellt werden)
+
+
+

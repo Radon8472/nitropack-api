@@ -1,0 +1,5 @@
+- Import old versions (e.g. different states of 1.19.2) from https://nitropack.io/download
+  - Check history of WordPress and OpenCart plugin, they contain different versions of 1.19.2 maybe older
+    - Add entries to Changelog (at least empty entry where features could be added when we know them)
+    - and "master" version of this api-repo
+  - import all of this versions into here and rebase branch "native-api-libs" on top of this

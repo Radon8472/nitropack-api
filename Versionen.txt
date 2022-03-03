@@ -1,0 +1,102 @@
+Quelle: https://nitropack.io/download
+	ACHTUNG: in "installed.json" steht bei Version 0.19.2 zwar überall die gleiche Version, aber in 
+	installed.php stehen andere, und auch der Code der Files ist minimal anders
+		- Auch in den Unter-Projekten lag teilweise noch ein Vendor-Ordner
+
+
+nitropack-sdk		0.30.0
+	- nitropack/httpclient#ed666783d9d5911f86e563ba3b4b7969020efc5a
+	- nitropack/url#55b4d631e69a697a9de0fd8e1cbbfa063226a5b8
+
+
+# in nitropack.1.5.8-wordpress-plugin / woo-Plugin
+nitropack-sdk		0.30.1
+	- nitropack/httpclient#ae92c176c1800a7ebf817f39d76324664290c958
+	- nitropack/url#55b4d631e69a697a9de0fd8e1cbbfa063226a5b8
+
+# in "nitropack-sdk--neueste Version vom Support"
+	- +Support für Änderbares Data-Dir
+nitropack-sdk		0.30.3
+	#- nitropack/httpclient#ae92c176c1800a7ebf817f39d76324664290c958
+	- nitropack/url#e1a54ed35d8990059b1d67857c0c096d21fc2c36
+
+
+
+
+# in NitroPack--OpenCart-plugin.zip
+
+- OpenCart OpenCart 2.0.x\upload\system\library\nitropackio\sdk\
+	- nitropack-sdk		0.19.2	dc93a93ae62b2b1b7d404a2dd57d1290b552e085
+		- nitropack/httpclient#2322728997a9a3e7f4adbb41229b347cce2ebab0
+		- nitropack/url#d10e616a333f5a5107137f88313c7ceba638c8a0
+- OpenCart OpenCart 2.1.x\upload\system\library\nitropackio\sdk\
+	#- nitropack-sdk		0.19.2	dc93a93ae62b2b1b7d404a2dd57d1290b552e085
+		- nitropack/httpclient#2322728997a9a3e7f4adbb41229b347cce2ebab0
+	#	- nitropack/url#d10e616a333f5a5107137f88313c7ceba638c8a0
+- OpenCart OpenCart 2.2.x\upload\system\library\nitropackio\sdk\
+	#- nitropack-sdk		0.19.2	dc93a93ae62b2b1b7d404a2dd57d1290b552e085
+	#	- nitropack/httpclient#2322728997a9a3e7f4adbb41229b347cce2ebab0
+	#	- nitropack/url#d10e616a333f5a5107137f88313c7ceba638c8a0
+- OpenCart OpenCart 2.3.x\upload\system\library\nitropackio\sdk\
+	#- nitropack-sdk		0.19.2	dc93a93ae62b2b1b7d404a2dd57d1290b552e085
+	#	- nitropack/httpclient#2322728997a9a3e7f4adbb41229b347cce2ebab0
+	#	- nitropack/url#d10e616a333f5a5107137f88313c7ceba638c8a0
+- OpenCart OpenCart 3.0.x\upload\system\library\nitropackio\sdk\
+	#- nitropack-sdk		0.19.2	13fbb0581464ff6224e9905cc422ba0f91e5a232
+	#	- nitropack/httpclient#2322728997a9a3e7f4adbb41229b347cce2ebab0
+	#	- nitropack/url#d10e616a333f5a5107137f88313c7ceba638c8a0
+
+
+
+# in NitroPack--Magento-plugin.zip
+	- nitropack-sdk		0.19.2	e50e27c8dfb5f2ad66e67c0f414ba8cd3ceacf66
+		- nitropack/httpclient#180b62773da5f9cc8c3581ecacaaaf5818bf00ea
+		- nitropack/url#d10e616a333f5a5107137f88313c7ceba638c8a0
+
+
+# MacroMan\nitropack-api (https://github.com/MacroMan/nitropack-api)
+	- nitropack-sdk		0.19.2	
+		# Was im Orginal extra Repos waren, wurde hier in unter-Ordner gepackt, dazu wurden die Namespaces der Files angepasst
+		- nitropack/httpclient
+		- nitropack/url
+
+# für das Wordpress-Plugin gibt es ein Öffentliches Repo, wo man (teilweise) die History des SDKs nachvollziehen könnte
+	- https://plugins.trac.wordpress.org/browser/nitropack?rev=2628183
+		Könnte man mit dieser Anleitung:
+		https://gist.github.com/kasparsd/3749872
+		- Vermutlich in Git importieren
+
+
+
+
+
+
+COMPOSER-Infos:
+
+- Offenbar liegen die Daten des SDK bereits in einem Repo, was aber scheinbar nicht öffentlich ist (Siehe "installed.json"):
+	- git@bitbucket.org:nitropack/httpclient.git
+	- git@bitbucket.org:nitropack/url.git
+
+- in den Ordnern gibt es auch noch eine "installed.php" und "InstalledVersions.php", evtl. ist das alles in einer älteren Composer-Version erstellt worden.
+	- Vileicht damit "install_path" nutzbar ist, soweit ich weis geht das in der aktuellen Composer-Version nicht
+	- Evtl. ist es aber auch Composer2, die erstellten php-files sehen leicht moderen aus als in meinem Composer (z.b. Optionale return-Types im phpdoc)
+		- Info zum Ändern der Install-Pfade:
+			- https://getcomposer.org/doc/faqs/how-do-i-install-a-package-to-a-custom-path-for-my-framework.md
+			- https://www.ask-sheldon.com/custom-install-path-composer/
+
+- nitropack/nitropackcloud-sdk
+	- Branch: master
+	- Type: package
+	- 'install_path' => __DIR__ . '/../../',	(Berechnet aus vendor\composer\)
+		--> Also liegt der Ordner am Ende in "NitroPack" auf der selbene Ebene wie der "vendor"-Ordner
+
+
+- nitropack/httpclient
+	- Branch: master
+	- Type: library
+	- 'install_path' => __DIR__ . '/../nitropack/httpclient',	(Berechnet aus vendor\composer\)
+
+- nitropack/url
+	- Branch: master
+	- Type: library
+	- 'install_path' => __DIR__ . '/../nitropack/url',	(Berechnet aus vendor\composer\)
